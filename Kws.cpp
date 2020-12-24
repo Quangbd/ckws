@@ -4,8 +4,8 @@
 
 #include "Kws.h"
 #include <string>
+#include <cstring>
 #include "logging.h"
-
 
 Kws::Kws(const char *model_buffer, size_t model_size) {
     model = TfLiteModelCreate(model_buffer, model_size);
