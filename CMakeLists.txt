@@ -4,8 +4,8 @@ project(ckws)
 set(CMAKE_CXX_STANDARD 11)
 set(SOURCE_FILE main.cpp Kws.cpp Kws.h logging.h constant.h)
 
-add_executable(ckws ${SOURCE_FILE})
-#add_library(ckws SHARED ${SOURCE_FILE})
+#add_executable(ckws ${SOURCE_FILE})
+add_library(ckws SHARED ${SOURCE_FILE})
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG")

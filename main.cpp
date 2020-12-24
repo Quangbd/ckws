@@ -1,14 +1,15 @@
 #include "Kws.h"
 #include "ds_cnn.h"
-#include "constant.h"
 #include <iostream>
+#include "logging.h"
 
 extern "C" {
 void init() {
     Kws::get_instance(reinterpret_cast<const char *>(ds_cnn1_tflite), ds_cnn1_tflite_len);
+    LOG_INFO("Init model have done");
 }
 
-bool wake_up(const short *input_buffer, size_t length) {
+bool wakeup(const short *input_buffer, size_t length) {
     Kws &kws = Kws::get_instance(nullptr, 0);
     // release
     return kws.wakeup(input_buffer, length);

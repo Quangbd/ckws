@@ -37,12 +37,12 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
     memcpy(&input_buffer_queue[total_sample - length], float_input_buffer, length * sizeof(float));
     free(float_input_buffer);
 
-    is_infer++;
-    if (is_infer != TIME_FOR_INFER) {
-        return false;
-    } else {
-        is_infer = 0;
-    }
+//    is_infer++;
+//    if (is_infer != TIME_FOR_INFER) {
+//        return false;
+//    } else {
+//        is_infer = 0;
+//    }
 
     TfLiteTensor *input_tensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
     const TfLiteTensor *output_tensor = TfLiteInterpreterGetOutputTensor(interpreter,
@@ -68,14 +68,14 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
     }
 
     if ((output[1] > output[0]) && ((float) (current_timestamp - previous_wakeup_time) > MIN_TIME_BETWEEN_WAKEUP)) {
-        LOG_DEBUG("Score N_%f - P_%f - %lu", output[0], output[1], wakeup_queue_scores.size());
+        LOG_INFO("Score N_%f - P_%f - %lu", output[0], output[1], wakeup_queue_scores.size());
         wakeup_queue_scores.push_back(output[1]);
         wakeup_queue_timestamps.push_back(current_timestamp);
         auto queue_size = wakeup_queue_timestamps.size();
         auto avg_score = std::accumulate(wakeup_queue_scores.begin(),
                                          wakeup_queue_scores.end(), 0.0) / queue_size;
         if (!is_new_command && (wakeup_queue_scores.size() > LIMIT_FREQUENTLY) && (avg_score > LIMIT_AVG_SCORE)) {
-            LOG_DEBUG("Wakeup core - %f", avg_score);
+            LOG_INFO("Wakeup core - %f", avg_score);
             previous_wakeup_time = current_timestamp;
             is_new_command = true;
             return true;
