@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.17)
 project(ckws)
 
 set(CMAKE_CXX_STANDARD 11)
-set(SOURCE_FILE main.cpp Kws.cpp Kws.h logging.h)
+set(SOURCE_FILE main.cpp Kws.cpp Kws.h logging.h wav_data.h)
 
 add_executable(ckws ${SOURCE_FILE})
 #add_library(ckws SHARED ${SOURCE_FILE})
@@ -13,5 +13,10 @@ endif ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 target_include_directories(ckws PRIVATE includes/tensorflow-lite)
 
-find_library(TENSORFLOW tensorflow-lite libs/osx_x86_64)
-target_link_libraries(ckws ${TENSORFLOW})
+if ("${BUILD_ENV}" STREQUAL "osx_x86_64")
+    target_link_directories(ckws PUBLIC libs/osx_x86_64)
+elseif ("${BUILD_ENV}" STREQUAL "rpi_armv7l")
+    target_link_directories(ckws PUBLIC libs/rpi_armv7l)
+endif ("${BUILD_ENV}" STREQUAL "osx_x86_64")
+
+target_link_libraries(ckws tensorflow-lite)

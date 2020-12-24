@@ -28,8 +28,6 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
         float_input_buffer[i] = float_input;
     }
 
-    long start = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
     TfLiteTensor *input_tensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
     const TfLiteTensor *output_tensor = TfLiteInterpreterGetOutputTensor(interpreter,
                                                                          0);
@@ -40,12 +38,8 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
     TfLiteTensorCopyToBuffer(output_tensor, &output[0], output_tensor->bytes);
     free(float_input_buffer);
 
-    long end = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
     long current_timestamp = std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
-//    LOG_INFO("infer %l", current_timestamp - start);
-    std::cout << "infer " << end - start << std::endl;
 
     if (is_new_command) {
         is_new_command = false;
