@@ -1,6 +1,6 @@
 #include "Kws.h"
 #include "ds_cnn.h"
-#include "wav_data.h"
+#include "constant.h"
 #include <iostream>
 
 extern "C" {
@@ -26,8 +26,11 @@ int main() {
 
     long start = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
-    for (int i = 0; i < 100; ++i) {
-        kws.wakeup(input_buffer, 16000);
+
+    for (int i = 0; i < 16000; i += 640) {
+        short sub_input_buffer[640];
+        memcpy(&sub_input_buffer[0], &input_buffer[i], 640 * sizeof(short));
+        kws.wakeup(sub_input_buffer, 640);
     }
 
     long end = std::chrono::duration_cast<std::chrono::milliseconds>(

@@ -10,6 +10,7 @@
 #include <deque>
 #include <chrono>
 #include <numeric>
+#include "constant.h"
 
 extern "C" {
 #include "includes/tensorflow-lite/c/c_api.h"
@@ -18,7 +19,7 @@ extern "C" {
 class Kws {
 private:
 
-// variable
+    // Variable
     TfLiteInterpreter *interpreter;
     TfLiteModel *model;
     TfLiteInterpreterOptions *options;
@@ -28,7 +29,11 @@ private:
     bool is_new_command = false;
     long previous_wakeup_time{};
 
-    // function
+    uint16_t total_sample;
+    float input_buffer_queue[TOTAL_SAMPLE]{};
+    uint8_t is_infer;
+
+    // Function
     Kws(const char *model_buffer, size_t model_size);
 
 public:
