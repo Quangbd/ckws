@@ -19,4 +19,4 @@ elseif ("${BUILD_ENV}" STREQUAL "rpi_armv7l")
     target_link_directories(ckws PUBLIC libs/rpi_armv7l)
 endif ("${BUILD_ENV}" STREQUAL "osx_x86_64")
 
-target_link_libraries(ckws tensorflow-lite)
+target_link_libraries(ckws tensorflow-lite pthread m dl)
