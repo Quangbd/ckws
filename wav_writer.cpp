@@ -4,7 +4,7 @@
 
 #include "wav_writer.h"
 #include <fstream>
-#include <climits>
+#include <chrono>
 
 void write_uint32(std::ostream &os, uint32_t i) {
     union {
