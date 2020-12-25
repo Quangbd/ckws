@@ -3,8 +3,6 @@
 //
 
 #include "Kws.h"
-#include <string>
-#include <cstring>
 #include "logging.h"
 
 Kws::Kws(const char *model_buffer, size_t model_size) {
@@ -26,10 +24,8 @@ Kws &Kws::get_instance(const char *model_buffer, size_t model_size) {
 
 bool Kws::wakeup(const short *short_input_buffer, int length) {
     auto *float_input_buffer = (float *) malloc(length * sizeof(float));
-    for (int i = 0; i < length; i++) {
-        float float_input = ((float) short_input_buffer[i] / MAX_SHORT);
-        float_input_buffer[i] = float_input;
-    }
+    std::transform(short_input_buffer, short_input_buffer + length, float_input_buffer,
+                   [](short s) { return (float) s / (float) SHRT_MAX; });
 
     // Copy to buffer queue
     memcpy(&input_buffer_queue[0], &input_buffer_queue[length],
@@ -37,6 +33,7 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
     memcpy(&input_buffer_queue[total_sample - length], float_input_buffer, length * sizeof(float));
     free(float_input_buffer);
 
+    // Limit infer
 //    is_infer++;
 //    if (is_infer != TIME_FOR_INFER) {
 //        return false;
@@ -76,6 +73,7 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
                                          wakeup_queue_scores.end(), 0.0) / queue_size;
         if (!is_new_command && (wakeup_queue_scores.size() > LIMIT_FREQUENTLY) && (avg_score > LIMIT_AVG_SCORE)) {
             LOG_INFO("Wakeup core - %f", avg_score);
+            write_frames("/Users/quangbd/Desktop/", input_buffer_queue, total_sample);
             previous_wakeup_time = current_timestamp;
             is_new_command = true;
             return true;

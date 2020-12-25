@@ -5,12 +5,13 @@
 #ifndef CKWS_KWS_H
 #define CKWS_KWS_H
 
-#include <string>
 #include <vector>
 #include <deque>
 #include <chrono>
 #include <numeric>
+#include <cstring>
 #include "constant.h"
+#include "wav_writer.h"
 
 extern "C" {
 #include "includes/tensorflow-lite/c/c_api.h"

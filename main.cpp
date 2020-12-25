@@ -1,6 +1,5 @@
 #include "Kws.h"
 #include "ds_cnn.h"
-#include <cstring>
 #include <iostream>
 #include "logging.h"
 
