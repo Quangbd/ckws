@@ -4,6 +4,7 @@
 
 #include "Kws.h"
 #include "logging.h"
+#include <climits>
 
 Kws::Kws(const char *model_buffer, size_t model_size) {
     model = TfLiteModelCreate(model_buffer, model_size);
@@ -73,7 +74,7 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
                                          wakeup_queue_scores.end(), 0.0) / queue_size;
         if (!is_new_command && (wakeup_queue_scores.size() > LIMIT_FREQUENTLY) && (avg_score > LIMIT_AVG_SCORE)) {
             LOG_INFO("Wakeup core - %f", avg_score);
-            write_frames("/Users/quangbd/Desktop/", input_buffer_queue, total_sample);
+            write_frames("/home/pi/Downloads/tmp/", input_buffer_queue, total_sample);
             previous_wakeup_time = current_timestamp;
             is_new_command = true;
             return true;
