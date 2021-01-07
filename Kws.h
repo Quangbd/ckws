@@ -50,7 +50,7 @@ public:
                              uint8_t count_threshold = 5, float avg_score_threshold = 0.5,
                              float min_duration_between_wakeup = 1.5, float min_time_buffer = 1);
 
-    bool wakeup(const short *short_input_buffer, int length);
+    int wakeup(const short *short_input_buffer, int length);
 
     void close();
 };

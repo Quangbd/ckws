@@ -33,7 +33,7 @@ Kws &Kws::get_instance(const char *model_buffer, size_t model_size, const char *
     return kws;
 }
 
-bool Kws::wakeup(const short *short_input_buffer, int length) {
+int Kws::wakeup(const short *short_input_buffer, int length) {
     auto *float_input_buffer = (float *) malloc(length * sizeof(float));
 //    std::transform(short_input_buffer, short_input_buffer + length, float_input_buffer,
 //                   [](short s) { return (float) s / (float) SHRT_MAX; });
@@ -64,7 +64,7 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
         is_new_command = false;
         wakeup_queue_timestamps.clear();
         wakeup_queue_scores.clear();
-        return false;
+        return 0;
     } else if (!wakeup_queue_timestamps.empty()
                && ((float) (current_timestamp - wakeup_queue_timestamps[0]) > min_time_buffer)) {
         wakeup_queue_timestamps.pop_front();
@@ -85,10 +85,10 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
             }
             previous_wakeup_time = current_timestamp;
             is_new_command = true;
-            return true;
+            return (int) (avg_score * 100);
         }
     }
-    return false;
+    return 0;
 }
 
 void Kws::close() {
