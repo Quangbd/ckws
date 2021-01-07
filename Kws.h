@@ -10,7 +10,6 @@
 #include <chrono>
 #include <numeric>
 #include <cstring>
-#include "constant.h"
 #include "wav_writer.h"
 
 extern "C" {
@@ -31,14 +30,25 @@ private:
     long previous_wakeup_time{};
 
     uint16_t total_sample;
-    float input_buffer_queue[TOTAL_SAMPLE]{};
-    uint8_t is_infer;
+    float *input_buffer_queue;
+
+    // Config threshold
+    uint8_t count_threshold;
+    float avg_score_threshold;
+    float min_duration_between_wakeup;
+    float min_time_buffer;
+    const char *storage_wav_path;
 
     // Function
-    Kws(const char *model_buffer, size_t model_size);
+    Kws(const char *model_buffer, size_t model_size, const char *storage_wav_path = nullptr,
+        uint16_t total_sample = 16000, uint8_t count_threshold = 5,
+        float avg_score_threshold = 0.5, float min_duration_between_wakeup = 1.5, float min_time_buffer = 1);
 
 public:
-    static Kws &get_instance(const char *model_buffer, size_t model_size);
+    static Kws &get_instance(const char *model_buffer, size_t model_size, const char *storage_wav_path = nullptr,
+                             uint16_t total_sample = 16000,
+                             uint8_t count_threshold = 5, float avg_score_threshold = 0.5,
+                             float min_duration_between_wakeup = 1.5, float min_time_buffer = 1);
 
     bool wakeup(const short *short_input_buffer, int length);
 

@@ -25,10 +25,11 @@ void write_uint16(std::ostream &os, uint16_t i) {
 }
 
 void write_frames(const std::string &folder_path, float *data, int length) {
+    std::string sym = "/";
     std::string name_format = ".wav";
     long current_timestamp = std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
-    std::string file_name_path = folder_path + std::to_string(current_timestamp) + name_format;
+    std::string file_name_path = folder_path + sym + std::to_string(current_timestamp) + name_format;
     std::ofstream f_out(file_name_path.c_str(), std::ios::out | std::ios::binary);
     if (!f_out) {
         throw std::runtime_error("Cannot open file");

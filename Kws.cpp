@@ -6,7 +6,9 @@
 #include "logging.h"
 #include <climits>
 
-Kws::Kws(const char *model_buffer, size_t model_size) {
+Kws::Kws(const char *model_buffer, size_t model_size, const char *storage_wav_path,
+         uint16_t total_sample, uint8_t count_threshold,
+         float avg_score_threshold, float min_duration_between_wakeup, float min_time_buffer) {
     model = TfLiteModelCreate(model_buffer, model_size);
     options = TfLiteInterpreterOptionsCreate();
 
@@ -14,12 +16,20 @@ Kws::Kws(const char *model_buffer, size_t model_size) {
     interpreter = TfLiteInterpreterCreate(model, options);
     TfLiteInterpreterAllocateTensors(interpreter);
 
-    total_sample = TOTAL_SAMPLE;
-    is_infer = 0;
+    this->total_sample = total_sample;
+    this->count_threshold = count_threshold;
+    this->avg_score_threshold = avg_score_threshold;
+    this->min_duration_between_wakeup = min_duration_between_wakeup;
+    this->min_time_buffer = min_time_buffer;
+    this->input_buffer_queue = (float *) malloc(total_sample * sizeof(float));
+    this->storage_wav_path = storage_wav_path;
 }
 
-Kws &Kws::get_instance(const char *model_buffer, size_t model_size) {
-    static Kws kws(model_buffer, model_size);
+Kws &Kws::get_instance(const char *model_buffer, size_t model_size, const char *storage_wav_path,
+                       uint16_t total_sample, uint8_t count_threshold,
+                       float avg_score_threshold, float min_duration_between_wakeup, float min_time_buffer) {
+    static Kws kws(model_buffer, model_size, storage_wav_path, total_sample, count_threshold, avg_score_threshold,
+                   min_duration_between_wakeup, min_time_buffer);
     return kws;
 }
 
@@ -37,14 +47,6 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
            (total_sample - length) * sizeof(float));
     memcpy(&input_buffer_queue[total_sample - length], float_input_buffer, length * sizeof(float));
     free(float_input_buffer);
-
-    // Limit infer
-//    is_infer++;
-//    if (is_infer != TIME_FOR_INFER) {
-//        return false;
-//    } else {
-//        is_infer = 0;
-//    }
 
     TfLiteTensor *input_tensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
     const TfLiteTensor *output_tensor = TfLiteInterpreterGetOutputTensor(interpreter,
@@ -64,21 +66,23 @@ bool Kws::wakeup(const short *short_input_buffer, int length) {
         wakeup_queue_scores.clear();
         return false;
     } else if (!wakeup_queue_timestamps.empty()
-               && ((float) (current_timestamp - wakeup_queue_timestamps[0]) > MIN_TIME_BUFFER)) {
+               && ((float) (current_timestamp - wakeup_queue_timestamps[0]) > min_time_buffer)) {
         wakeup_queue_timestamps.pop_front();
         wakeup_queue_scores.pop_front();
     }
 
-    if ((output[1] > output[0]) && ((float) (current_timestamp - previous_wakeup_time) > MIN_TIME_BETWEEN_WAKEUP)) {
-        LOG_INFO("Score N_%f - P_%f - %lu", output[0], output[1], wakeup_queue_scores.size());
-        wakeup_queue_scores.push_back(output[1]);
+    if ((output[1] > output[0]) && ((float) (current_timestamp - previous_wakeup_time) > min_duration_between_wakeup)) {
+        LOG_DEBUG("Score N_%f - P_%f - %lu", output[0], output[1], wakeup_queue_scores.size());
+        wakeup_queue_scores.push_back(output[1] - output[0]);
         wakeup_queue_timestamps.push_back(current_timestamp);
         auto queue_size = wakeup_queue_timestamps.size();
         auto avg_score = std::accumulate(wakeup_queue_scores.begin(),
                                          wakeup_queue_scores.end(), 0.0) / queue_size;
-        if (!is_new_command && (wakeup_queue_scores.size() > LIMIT_FREQUENTLY) && (avg_score > LIMIT_AVG_SCORE)) {
-            LOG_INFO("Wakeup core - %f", avg_score);
-            write_frames("/home/pi/Downloads/tmp/", input_buffer_queue, total_sample);
+        if (!is_new_command && (wakeup_queue_scores.size() > count_threshold) && (avg_score > avg_score_threshold)) {
+            LOG_DEBUG("Wakeup core - %f", avg_score);
+            if (storage_wav_path != nullptr) {
+                write_frames(storage_wav_path, input_buffer_queue, total_sample);
+            }
             previous_wakeup_time = current_timestamp;
             is_new_command = true;
             return true;
@@ -91,6 +95,8 @@ void Kws::close() {
     TfLiteInterpreterDelete(interpreter);
     TfLiteInterpreterOptionsDelete(options);
     TfLiteModelDelete(model);
+    free(input_buffer_queue);
 }
+
 
 
