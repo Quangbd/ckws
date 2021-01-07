@@ -35,20 +35,22 @@ private:
     // Config threshold
     uint8_t count_threshold;
     float avg_score_threshold;
+    float max_score_threshold;
     float min_duration_between_wakeup;
     float min_time_buffer;
     const char *storage_wav_path;
 
     // Function
-    Kws(const char *model_buffer, size_t model_size, const char *storage_wav_path = nullptr,
-        uint16_t total_sample = 16000, uint8_t count_threshold = 5,
-        float avg_score_threshold = 0.5, float min_duration_between_wakeup = 1.5, float min_time_buffer = 1);
+    Kws(const char *model_buffer, size_t model_size, const char *storage_wav_path,
+        uint16_t total_sample, uint8_t count_threshold, float max_score_threshold,
+        float avg_score_threshold, float min_duration_between_wakeup, float min_time_buffer);
 
 public:
     static Kws &get_instance(const char *model_buffer, size_t model_size, const char *storage_wav_path = nullptr,
                              uint16_t total_sample = 16000,
-                             uint8_t count_threshold = 5, float avg_score_threshold = 0.5,
-                             float min_duration_between_wakeup = 1.5, float min_time_buffer = 1);
+                             uint8_t count_threshold = 5, float max_score_threshold = 0.7,
+                             float avg_score_threshold = 0.5, float min_duration_between_wakeup = 1.5,
+                             float min_time_buffer = 1);
 
     int wakeup(const short *short_input_buffer, int length);
 

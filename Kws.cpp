@@ -7,7 +7,7 @@
 #include <climits>
 
 Kws::Kws(const char *model_buffer, size_t model_size, const char *storage_wav_path,
-         uint16_t total_sample, uint8_t count_threshold,
+         uint16_t total_sample, uint8_t count_threshold, float max_score_threshold,
          float avg_score_threshold, float min_duration_between_wakeup, float min_time_buffer) {
     model = TfLiteModelCreate(model_buffer, model_size);
     options = TfLiteInterpreterOptionsCreate();
@@ -18,6 +18,7 @@ Kws::Kws(const char *model_buffer, size_t model_size, const char *storage_wav_pa
 
     this->total_sample = total_sample;
     this->count_threshold = count_threshold;
+    this->max_score_threshold = max_score_threshold;
     this->avg_score_threshold = avg_score_threshold;
     this->min_duration_between_wakeup = min_duration_between_wakeup;
     this->min_time_buffer = min_time_buffer;
@@ -26,10 +27,10 @@ Kws::Kws(const char *model_buffer, size_t model_size, const char *storage_wav_pa
 }
 
 Kws &Kws::get_instance(const char *model_buffer, size_t model_size, const char *storage_wav_path,
-                       uint16_t total_sample, uint8_t count_threshold,
+                       uint16_t total_sample, uint8_t count_threshold, float max_score_threshold,
                        float avg_score_threshold, float min_duration_between_wakeup, float min_time_buffer) {
-    static Kws kws(model_buffer, model_size, storage_wav_path, total_sample, count_threshold, avg_score_threshold,
-                   min_duration_between_wakeup, min_time_buffer);
+    static Kws kws(model_buffer, model_size, storage_wav_path, total_sample, count_threshold, max_score_threshold,
+                   avg_score_threshold, min_duration_between_wakeup, min_time_buffer);
     return kws;
 }
 
@@ -75,17 +76,20 @@ int Kws::wakeup(const short *short_input_buffer, int length) {
         LOG_DEBUG("Score N_%f - P_%f - %lu", output[0], output[1], wakeup_queue_scores.size());
         wakeup_queue_scores.push_back(output[1] - output[0]);
         wakeup_queue_timestamps.push_back(current_timestamp);
-        auto queue_size = wakeup_queue_timestamps.size();
-        auto avg_score = std::accumulate(wakeup_queue_scores.begin(),
-                                         wakeup_queue_scores.end(), 0.0) / queue_size;
-        if (!is_new_command && (wakeup_queue_scores.size() > count_threshold) && (avg_score > avg_score_threshold)) {
-            LOG_DEBUG("Wakeup core - %f", avg_score);
-            if (storage_wav_path != nullptr) {
-                write_frames(storage_wav_path, input_buffer_queue, total_sample);
+        auto queue_size = wakeup_queue_scores.size();
+        if (!is_new_command && (wakeup_queue_scores.size() > count_threshold)) {
+            auto avg_score = std::accumulate(wakeup_queue_scores.begin(),
+                                             wakeup_queue_scores.end(), 0.0) / queue_size;
+            auto max_score = std::max_element(wakeup_queue_scores.begin(), wakeup_queue_scores.end())[0];
+            if ((max_score > max_score_threshold) && (avg_score > avg_score_threshold)) {
+                LOG_DEBUG("Wakeup core - %f", avg_score);
+                if (storage_wav_path != nullptr) {
+                    write_frames(storage_wav_path, input_buffer_queue, total_sample);
+                }
+                previous_wakeup_time = current_timestamp;
+                is_new_command = true;
+                return (int) (avg_score * 100);
             }
-            previous_wakeup_time = current_timestamp;
-            is_new_command = true;
-            return (int) (avg_score * 100);
         }
     }
     return 0;
