@@ -5,6 +5,7 @@
 #include "Kws.h"
 #include "logging.h"
 #include <climits>
+#include <algorithm>
 
 Kws::Kws(const char *model_buffer, size_t model_size, const char *storage_wav_path,
          uint16_t total_sample, uint8_t count_threshold, float max_score_threshold,
