@@ -60,7 +60,7 @@ static void I_LOG(L_LEVEL log_level, const char *file, const char *func, unsigne
         default:
             android_log_level = ANDROID_LOG_DEBUG;
     }
-    __android_log_print(android_log_level, tag, message);
+    __android_log_print(android_log_level, tag, "%s", message);
 #else
     if (log_level == LOG_LEVEL_ERROR) {
         std::cerr << file << ":" << line << " " << func << std::endl;
