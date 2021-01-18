@@ -3,6 +3,11 @@
 #include "logging.h"
 #include "wav_data.h"
 
+#ifdef __ANDROID__
+#include <jni.h>
+#else
+#endif
+
 extern "C" {
 void init(const char *storage_wav_path = nullptr) {
     Kws::get_instance(reinterpret_cast<const char *>(ds_cnn1_tflite), ds_cnn1_tflite_len, storage_wav_path);
@@ -18,6 +23,27 @@ void close() {
     Kws &kws = Kws::get_instance(nullptr, 0);
     kws.close();
 }
+
+
+#ifdef __ANDROID__
+JNIEXPORT jboolean JNICALL
+Java_hino_konoha_hokages_Minato_loadNavtiveChakra(JNIEnv *env, __unused jobject thiz,
+                                                  jstring output_wav_dir) {
+    Kws::get_instance(reinterpret_cast<const char *>(ds_cnn1_tflite), ds_cnn1_tflite_len, nullptr);
+    LOG_INFO("Init model have done");
+    return true;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_hino_konoha_hokages_Minato_teleportation(JNIEnv *env, __unused jobject thiz,
+                                              jshortArray input_buffer, jint length) {
+    short *short_input_buffer = env->GetShortArrayElements(input_buffer, nullptr);
+    Kws &kws = Kws::get_instance(nullptr, 0);
+    return kws.wakeup(short_input_buffer, length);
+}
+#else
+#endif
 }
 
 int main() {

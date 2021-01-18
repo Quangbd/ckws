@@ -50,9 +50,12 @@ int Kws::wakeup(const short *short_input_buffer, int length) {
     memcpy(&input_buffer_queue[total_sample - length], float_input_buffer, length * sizeof(float));
     free(float_input_buffer);
 
+    LOG_INFO("Length1");
+
     TfLiteTensor *input_tensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
     const TfLiteTensor *output_tensor = TfLiteInterpreterGetOutputTensor(interpreter,
                                                                          0);
+    LOG_INFO("Length2");
     TfLiteTensorCopyFromBuffer(input_tensor,
                                &input_buffer_queue[0], input_tensor->bytes);
     TfLiteInterpreterInvoke(interpreter);
@@ -61,7 +64,7 @@ int Kws::wakeup(const short *short_input_buffer, int length) {
 
     long current_timestamp = std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
-
+    LOG_INFO("Length3");
     if (is_new_command) {
         is_new_command = false;
         wakeup_queue_timestamps.clear();
@@ -89,6 +92,7 @@ int Kws::wakeup(const short *short_input_buffer, int length) {
                 }
                 previous_wakeup_time = current_timestamp;
                 is_new_command = true;
+                memset(&input_buffer_queue[0], 0, total_sample * sizeof(float));
                 return (int) (avg_score * 100);
             }
         }

@@ -13,7 +13,11 @@
 #include "wav_writer.h"
 
 extern "C" {
-#include "includes/tensorflow-lite/c/c_api.h"
+#ifdef __ANDROID__
+#include "includes/tensorflow-lite-android/c/c_api.h"
+#else
+#include "includes/tensorflow-lite-pc/c/c_api.h"
+#endif
 }
 
 class Kws {

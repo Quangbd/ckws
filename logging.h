@@ -59,6 +59,7 @@ static void I_LOG(L_LEVEL log_level, const char *file, const char *func, unsigne
             break;
         default:
             android_log_level = ANDROID_LOG_DEBUG;
+            break;
     }
     __android_log_print(android_log_level, tag, "%s", message);
 #else

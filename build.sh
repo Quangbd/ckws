@@ -6,6 +6,6 @@ cmake \
     -DCMAKE_TOOLCHAIN_FILE=/Users/quangbd/Library/Android/sdk/ndk/21.1.6352462/build/cmake/android.toolchain.cmake \
     -DANDROID_ABI=arm64-v8a \
     -DBUILD_ENV=arm64-v8a \
-    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_BUILD_TYPE=Debug \
     -DANDROID_NATIVE_API_LEVEL=28 ..
 make -j4
