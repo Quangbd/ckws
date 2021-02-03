@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.17)
 project(ckws)
 
 set(CMAKE_CXX_STANDARD 11)
-set(SOURCE_FILE main.cpp Kws.cpp Kws.h logging.h wav_data.h wav_writer.cpp wav_writer.h)
+set(SOURCE_FILE main.cpp Model.cpp Model.h logging.h wav_data.h wav_writer.cpp wav_writer.h Kws.cpp Kws.h)
 
 add_executable(ckws ${SOURCE_FILE})
 #add_library(ckws SHARED ${SOURCE_FILE})

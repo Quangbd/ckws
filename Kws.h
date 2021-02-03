@@ -1,56 +1,30 @@
 //
-// Created by quangbd on 22/12/2020.
+// Created by quangbd on 03/02/2021.
 //
 
 #ifndef CKWS_KWS_H
 #define CKWS_KWS_H
 
-#include <vector>
+#include "Model.h"
 #include <deque>
-#include <chrono>
-#include <numeric>
-#include <cstring>
-#include "wav_writer.h"
 
-extern "C" {
-#include "includes/tensorflow-lite/c/c_api.h"
-}
 
 class Kws {
 private:
+    Model ds_cnn;
+    Model lstm;
 
-    // Variable
-    TfLiteInterpreter *interpreter;
-    TfLiteModel *model;
-    TfLiteInterpreterOptions *options;
-
+    const char *storage_wav_path;
     std::deque<float> wakeup_queue_scores;
     std::deque<long> wakeup_queue_timestamps;
-    bool is_new_command = false;
-    long previous_wakeup_time{};
-
     uint16_t total_sample;
-    float *input_buffer_queue;
+    float *input_buffer_queue{};
 
-    // Config threshold
-    uint8_t count_threshold;
-    float avg_score_threshold;
-    float max_score_threshold;
-    float min_duration_between_wakeup;
-    float min_time_buffer;
-    const char *storage_wav_path;
-
-    // Function
-    Kws(const char *model_buffer, size_t model_size, const char *storage_wav_path,
-        uint16_t total_sample, uint8_t count_threshold, float max_score_threshold,
-        float avg_score_threshold, float min_duration_between_wakeup, float min_time_buffer);
+    // Constructor
+    Kws(const char *storage_wav_path, uint16_t total_sample);
 
 public:
-    static Kws &get_instance(const char *model_buffer, size_t model_size, const char *storage_wav_path = nullptr,
-                             uint16_t total_sample = 16000,
-                             uint8_t count_threshold = 5, float max_score_threshold = 0.7,
-                             float avg_score_threshold = 0.5, float min_duration_between_wakeup = 1.5,
-                             float min_time_buffer = 1);
+    static Kws &get_instance(const char *storage_wav_path, uint16_t total_sample = 16000);
 
     int wakeup(const short *short_input_buffer, int length);
 
