@@ -3,6 +3,7 @@
 #include "logging.h"
 #include "wav_data.h"
 
+
 #ifdef __ANDROID__
 #include <jni.h>
 #else
@@ -24,9 +25,12 @@ Java_hino_konoha_hokages_Minato_teleportation(JNIEnv *env, __unused jobject thiz
                                               jshortArray input_buffer, jint length) {
     short *short_input_buffer = env->GetShortArrayElements(input_buffer, nullptr);
     Kws &kws = Kws::get_instance(nullptr, 0);
-    return kws.wakeup(short_input_buffer, length);
+    int result = kws.wakeup(short_input_buffer, length);
+    env->ReleaseShortArrayElements(input_buffer, short_input_buffer, 0);
+    return result;
 }
 #else
+
 void c_kws_init(const char *storage_wav_path = nullptr) {
     Kws::get_instance(reinterpret_cast<const char *>(lstm1_tflite), lstm1_tflite_len, storage_wav_path);
     LOG_DEBUG("Init model have done");
