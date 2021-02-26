@@ -30,17 +30,17 @@ Java_hino_konoha_hokages_Minato_teleportation(JNIEnv *env, __unused jobject thiz
 }
 #else
 
-void c_kws_init(const char *storage_wav_path = nullptr) {
+void py_init(const char *storage_wav_path = nullptr) {
     Kws::get_instance(storage_wav_path);
     LOG_DEBUG("Init model have done");
 }
 
-int c_kws_wakeup(const short *input_buffer, size_t length) {
+int py_wakeup(const short *input_buffer, size_t length) {
     Kws &kws = Kws::get_instance(nullptr, 0);
     return kws.wakeup(input_buffer, length);
 }
 
-void c_kws_close() {
+void py_close() {
     Kws &kws = Kws::get_instance(nullptr, 0);
     kws.close();
 }

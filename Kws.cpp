@@ -63,12 +63,13 @@ int Kws::wakeup(const short *short_input_buffer, int length) {
         wakeup_queue_scores.push_back(d_output[1] - d_output[0]);
         wakeup_queue_timestamps.push_back(current_timestamp);
         auto queue_size = wakeup_queue_scores.size();
-        LOG_INFO("d_output: neg %f - pos %f - size %d", d_output[0], d_output[1], queue_size);
-        if (!is_new_command && (wakeup_queue_scores.size() > count_threshold)) {
+        LOG_INFO("d_output: neg %f - pos %f - size %d - is_nc %d",
+                 d_output[0], d_output[1], queue_size, is_new_command);
+        if (!is_new_command && (queue_size > count_threshold)) {
             std::vector<float> l_output = lstm.predict(input_buffer_queue);
-            LOG_INFO("l_output: %f - %f", l_output[0], l_output[1]);
             auto result_score = l_output[1] - l_output[0];
-            if (result_score > 0.9) {
+            LOG_INFO("l_output: %f - %f", l_output[0], l_output[1]);
+            if (result_score > 0.4) {
                 is_new_command = true;
                 if (storage_wav_path != nullptr) {
                     write_frames(storage_wav_path, input_buffer_queue, total_sample);

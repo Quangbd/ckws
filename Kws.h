@@ -33,7 +33,7 @@ private:
 
 public:
     static Kws &get_instance(const char *storage_wav_path = nullptr, uint16_t total_sample = 16000,
-                             uint8_t count_threshold = 3, float min_duration_between_wakeup = 1.5,
+                             uint8_t count_threshold = 0, float min_duration_between_wakeup = 1.5,
                              float min_time_buffer = 1);
 
     int wakeup(const short *short_input_buffer, int length);
