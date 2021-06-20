@@ -37,7 +37,7 @@ void py_init(const char *storage_wav_path = nullptr) {
 
 int py_wakeup(const short *input_buffer, size_t length) {
     Kws &kws = Kws::get_instance(nullptr, 0);
-    return kws.wakeup(input_buffer, length);
+    return kws.wakeup(input_buffer, (int) length);
 }
 
 void py_close() {

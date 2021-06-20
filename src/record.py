@@ -42,7 +42,7 @@ if __name__ == '__main__':
     SAMPLE_RATE = 16_000
     CHANNELS = 1
 
-    kws_ = cdll.LoadLibrary('build/libckws.dylib')
+    kws_ = cdll.LoadLibrary('../cmake-build-debug/libckws.dylib')
     kws_.py_init(None)
     kws_test = (c_short * CHUNK)
 

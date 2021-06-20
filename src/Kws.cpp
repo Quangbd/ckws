@@ -11,7 +11,7 @@
 
 Kws::Kws(const char *storage_wav_path, uint16_t total_sample, uint8_t count_threshold,
          float min_duration_between_wakeup, float min_time_buffer) {
-    ds_cnn = Model(reinterpret_cast<const char *>(ds_cnn1_tflite), ds_cnn1_tflite_len);
+    ds_cnn = Model(reinterpret_cast<const char *>(ds_cnn3_tflite), ds_cnn3_tflite_len);
     lstm = Model(reinterpret_cast<const char *>(lstm1_tflite), lstm1_tflite_len);
 
     this->total_sample = total_sample;
@@ -57,18 +57,22 @@ int Kws::wakeup(const short *short_input_buffer, int length) {
 
     // ds_cnn predict
     std::vector<float> d_output = ds_cnn.predict(input_buffer_queue);
+    float re_positive = d_output[0];
+    float re_negative = d_output[1];
 
-    if ((d_output[1] > d_output[0]) &&
+    if ((re_positive > re_negative) &&
         ((float) (current_timestamp - previous_wakeup_time) > min_duration_between_wakeup)) {
-        wakeup_queue_scores.push_back(d_output[1] - d_output[0]);
+        wakeup_queue_scores.push_back(re_positive - re_negative);
         wakeup_queue_timestamps.push_back(current_timestamp);
         auto queue_size = wakeup_queue_scores.size();
         LOG_INFO("d_output: neg %f - pos %f - size %d - is_nc %d",
-                 d_output[0], d_output[1], queue_size, is_new_command);
+                 re_negative, re_positive, queue_size, is_new_command);
         if (!is_new_command && (queue_size > count_threshold)) {
             std::vector<float> l_output = lstm.predict(input_buffer_queue);
-            auto result_score = l_output[1] - l_output[0];
-            LOG_INFO("l_output: %f - %f", l_output[0], l_output[1]);
+            float lre_positive = l_output[0];
+            float lre_negative = l_output[1];
+            auto result_score = lre_positive - lre_negative;
+            LOG_INFO("l_output: %f - %f", lre_positive, lre_negative);
             if (result_score > 0.4) {
                 is_new_command = true;
                 if (storage_wav_path != nullptr) {

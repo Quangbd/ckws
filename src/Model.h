@@ -10,7 +10,7 @@
 #include <cstring>
 
 extern "C" {
-#include "includes/tensorflow-lite/c/c_api.h"
+#include "tensorflow-lite/c/c_api.h"
 }
 
 class Model {
